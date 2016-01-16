@@ -41,5 +41,5 @@ Both testing and deploying require an active virtual environment
 
 To test, run `python robot.py sim`.
 
-To deploy, run `python robot.py deploy`, when connected to the same network
+To deploy, run `python robot.py deploy --nc`, when connected to the same network
 as the RoboRIO.
