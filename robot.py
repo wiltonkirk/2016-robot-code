@@ -18,7 +18,15 @@ class MyRobot(wpilib.IterativeRobot):
         self.motor_shooter_lift = wpilib.Jaguar(4)
         self.motor_shooter_release = wpilib.Jaguar(5)
 
-        self.shooter = Shooter.Shooter(left_motor=self.motor_shooter_left, right_motor=self.motor_shooter_right, tilt_motor=self.motor_shooter_lift, release_motor=self.motor_shooter_release)
+        self.lift_slow_up = wpilib.DigitalInput(0)
+        self.lift_slow_down = wpilib.DigitalInput(1)
+
+        self.shooter = Shooter.Shooter(left_motor=self.motor_shooter_left,
+                                       right_motor=self.motor_shooter_right,
+                                       tilt_motor=self.motor_shooter_lift,
+                                       release_motor=self.motor_shooter_release,
+                                       lift_slow_up_limit=self.lift_slow_up,
+                                       lift_slow_down_limit=self.lift_slow_down)
 
         self.drive_train = wpilib.RobotDrive(self.motor_left, self.motor_right)
         self.drive_train.setExpiration(0.2)
