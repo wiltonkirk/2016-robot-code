@@ -36,7 +36,7 @@ class Shooter:
         self.tilt_motor.set(0.0)
 
     def run_kick(self):
-        self.kick_motor.set(1.0)
+        self.kick_motor.set(-1.0)
 
     def stop_launcher(self):
         self.set_boulder_speed(0.0)

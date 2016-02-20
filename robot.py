@@ -9,17 +9,16 @@ class MyRobot(wpilib.IterativeRobot):
     def robotInit(self):
         self.kicking = False
 
-        self.joystick_right = wpilib.Joystick(0)
-        self.joystick_left = wpilib.Joystick(1)
-        self.joystick_lift = wpilib.Joystick(2)
+        self.joystick_drive = wpilib.Joystick(0)
+        self.joystick_lift = wpilib.Joystick(1)
 
         self.motor_left = wpilib.Jaguar(0)
         self.motor_right = wpilib.Jaguar(1)
 
-        self.motor_shooter_left = wpilib.Jaguar(2)
-        self.motor_shooter_right = wpilib.Jaguar(3)
-        self.motor_shooter_lift = wpilib.Jaguar(4)
-        self.motor_shooter_kick = wpilib.Jaguar(5)
+        self.motor_shooter_left = wpilib.Talon(4)
+        self.motor_shooter_right = wpilib.Talon(5)
+        self.motor_shooter_lift = wpilib.Jaguar(2)
+        self.motor_shooter_kick = wpilib.Jaguar(3)
 
         self.kick_stop = wpilib.DigitalInput(0)
 
@@ -54,23 +53,24 @@ class MyRobot(wpilib.IterativeRobot):
             self.shooter.stop_kick()
 
     def teleopPeriodic(self):
-        if self.joystick_right.getRawButton(8): # Switch to tank drive if a special button is held down
-            self.drive_train.tankDrive(self.joystick_left.getY(), self.joystick_right.getY())
+         # Switch to tank drive if a special button is held down
+        if self.joystick_drive.getRawButton(8) or self.joystick_drive.getRawButton(6):
+            self.drive_train.tankDrive(self.joystick_drive.getY(), self.joystick_drive.getAxis(4))
         else:
-            self.drive_train.arcadeDrive(self.joystick_right.getY(), self.joystick_left.getX() * -1)
+            self.drive_train.arcadeDrive(self.joystick_drive.getY(), self.joystick_drive.getZ())
 
         # Control the tilt of the shooter
-        if self.joystick_lift.getRawButton(3):
+        if self.joystick_lift.getRawButton(4):
             self.shooter.tilt_up()
-        elif self.joystick_lift.getRawButton(4):
+        elif self.joystick_lift.getRawButton(2):
             self.shooter.tilt_down()
         else:
             self.shooter.stop_tilt()
 
         # Control the launch wheels
-        if self.joystick_lift.getRawButton(5):
+        if self.joystick_lift.getRawButton(1):
             self.shooter.set_boulder_speed(-0.4)
-        elif self.joystick_lift.getRawButton(6):
+        elif self.joystick_lift.getRawButton(3):
             if self.joystick_lift.getRawButton(8):
                 self.shooter.set_boulder_speed(0.5)
             else:
