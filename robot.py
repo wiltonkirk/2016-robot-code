@@ -7,8 +7,11 @@ from mechanisms import *
 class MyRobot(wpilib.IterativeRobot):
 
     def robotInit(self):
+        self.kicking = False
+
         self.joystick_right = wpilib.Joystick(0)
         self.joystick_left = wpilib.Joystick(1)
+        self.joystick_lift = wpilib.Joystick(2)
 
         self.motor_left = wpilib.Jaguar(0)
         self.motor_right = wpilib.Jaguar(1)
@@ -16,15 +19,17 @@ class MyRobot(wpilib.IterativeRobot):
         self.motor_shooter_left = wpilib.Jaguar(2)
         self.motor_shooter_right = wpilib.Jaguar(3)
         self.motor_shooter_lift = wpilib.Jaguar(4)
-        self.motor_shooter_release = wpilib.Jaguar(5)
+        self.motor_shooter_kick = wpilib.Jaguar(5)
 
-        self.lift_slow_up = wpilib.DigitalInput(0)
-        self.lift_slow_down = wpilib.DigitalInput(1)
+        self.kick_stop = wpilib.DigitalInput(0)
+
+        self.lift_slow_up = wpilib.DigitalInput(1)
+        self.lift_slow_down = wpilib.DigitalInput(2)
 
         self.shooter = Shooter.Shooter(left_motor=self.motor_shooter_left,
                                        right_motor=self.motor_shooter_right,
                                        tilt_motor=self.motor_shooter_lift,
-                                       release_motor=self.motor_shooter_release,
+                                       kick_motor=self.motor_shooter_kick,
                                        lift_slow_up_limit=self.lift_slow_up,
                                        lift_slow_down_limit=self.lift_slow_down)
 
@@ -32,6 +37,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.drive_train.setExpiration(0.2)
 
     def autonomousInit(self):
+        self.drive_train.drive(0.0, 0.0)
+
         # Motors have to be updated every 0.2 seconds or they stop - disable
         # that in autonomous mode
         self.drive_train.setSafetyEnabled(False)
@@ -39,30 +46,54 @@ class MyRobot(wpilib.IterativeRobot):
         # Re-enable the motor watchdog timer when we're done
         self.drive_train.setSafetyEnabled(True)
 
+    def autonomousPeriodic(self):
+        self.drive_train.drive(0.0, 0.0)
+        if not self.kick_stop.get():
+            self.shooter.run_kick()
+        else:
+            self.shooter.stop_kick()
+
     def teleopPeriodic(self):
-        self.drive_train.arcadeDrive(self.joystick_right.getY(), self.joystick_left.getX() * -1)
+        if self.joystick_right.getRawButton(8): # Switch to tank drive if a special button is held down
+            self.drive_train.tankDrive(self.joystick_left.getY(), self.joystick_right.getY())
+        else:
+            self.drive_train.arcadeDrive(self.joystick_right.getY(), self.joystick_left.getX() * -1)
 
         # Control the tilt of the shooter
-        if self.joystick_right.getRawButton(3):
+        if self.joystick_lift.getRawButton(3):
             self.shooter.tilt_up()
-        elif self.joystick_right.getRawButton(4):
+        elif self.joystick_lift.getRawButton(4):
             self.shooter.tilt_down()
         else:
             self.shooter.stop_tilt()
 
         # Control the launch wheels
-        if self.joystick_right.getRawButton(5):
-            self.shooter.receive_boulder()
-        elif self.joystick_right.getRawButton(6):
-            self.shooter.set_boulder_speed(1.0)
+        if self.joystick_lift.getRawButton(5):
+            self.shooter.set_boulder_speed(-0.4)
+        elif self.joystick_lift.getRawButton(6):
+            if self.joystick_lift.getRawButton(8):
+                self.shooter.set_boulder_speed(0.5)
+            else:
+                self.shooter.set_boulder_speed(1.0)
         else:
             self.shooter.stop_launcher()
 
-        # The kick should be either in receive position or kicking the boulder
-        if self.joystick_right.getRawButton(7):
-            self.shooter.kick_boulder()
-        else:
-            self.shooter.open_release()
+        # Set a flag that we should complete a rotation so we don't stop
+        # until we've gotten all the way around
+
+        if self.joystick_lift.getRawButton(7): # Set the flag and start rotation
+            self.kicking = True
+            self.shooter.run_kick()
+        elif self.kicking and self.kick_stop.get(): # If we're kicking and we haven't moved enough to
+            self.shooter.run_kick()                 # flip the switch, run anyway
+        elif self.kicking and not self.kick_stop.get(): # After the switch is depressed, unset the flag
+            self.shooter.run_kick()                     # and keep going
+            self.kicking = False
+        elif not self.kick_stop.get(): # If the button is depressed, run the kicker around
+            self.shooter.run_kick()
+        else: # If we have no idea whats going on stop everything
+            self.shooter.stop_kick()
+
 
 if __name__ == '__main__':
     wpilib.run(MyRobot)

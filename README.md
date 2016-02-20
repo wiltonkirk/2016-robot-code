@@ -1,6 +1,19 @@
 2016 Robot Code
 ===============
 
+## Buttons
+On the drivers controller:
+* Left joystick is forward/reverse, right joystick is left/right.
+* Button 8 converts to tank drive
+
+On the lift joystick:
+* Button 3 tilts the shooter up
+* Button 4 tilts the shooter down
+* Button 5 runs the pickup wheels in
+* Button 6 runs the pickup wheels out at full speed
+  * Simultaneously pressing button 8 slows them down to half speed
+* Button 7 forces a single revolution on the kick wheel
+
 ## Extending
 
 To make the robot do interesting things. Objects from
@@ -37,7 +50,7 @@ pip install -r requirements.txt
 ### Testing and Deploying
 
 Both testing and deploying require an active virtual environment
-(`source venv/bin/activate`). 
+(`source venv/bin/activate`).
 
 To test, run `python robot.py sim`.
 
