@@ -20,19 +20,19 @@ class MyRobot(wpilib.IterativeRobot):
         self.motor_shooter_lift = wpilib.Jaguar(2)
         self.motor_shooter_kick = wpilib.Jaguar(3)
 
-        self.kick_stop = wpilib.DigitalInput(0)
-
-        self.lift_slow_up = wpilib.DigitalInput(1)
-        self.lift_slow_down = wpilib.DigitalInput(2)
+        self.kick_stop = wpilib.DigitalInput(2)
+        self.soft_lift_stop = wpilib.DigitalInput(1)
 
         self.shooter = Shooter.Shooter(left_motor=self.motor_shooter_left,
                                        right_motor=self.motor_shooter_right,
                                        tilt_motor=self.motor_shooter_lift,
-                                       kick_motor=self.motor_shooter_kick,
-                                       lift_slow_up_limit=self.lift_slow_up,
-                                       lift_slow_down_limit=self.lift_slow_down)
-
+                                       kick_motor=self.motor_shooter_kick)
         self.drive_train = wpilib.RobotDrive(self.motor_left, self.motor_right)
+
+
+        self.elbow_motor = wpilib.Jaguar(6)
+        self.arm_tilt = wpilib.Jaguar(7)
+
         self.drive_train.setExpiration(0.2)
 
     def autonomousInit(self):
@@ -52,7 +52,13 @@ class MyRobot(wpilib.IterativeRobot):
         else:
             self.shooter.stop_kick()
 
+    def teleopInit(self):
+        self.kicking = False
+
     def teleopPeriodic(self):
+        # self.elbow_motor.set(self.joystick_lift.getX())
+        # self.arm_tilt.set(self.joystick_lift.getZ())
+
          # Switch to tank drive if a special button is held down
         if self.joystick_drive.getRawButton(8) or self.joystick_drive.getRawButton(6):
             self.drive_train.tankDrive(self.joystick_drive.getY(), self.joystick_drive.getAxis(4))
@@ -60,10 +66,12 @@ class MyRobot(wpilib.IterativeRobot):
             self.drive_train.arcadeDrive(self.joystick_drive.getY(), self.joystick_drive.getZ())
 
         # Control the tilt of the shooter
-        if self.joystick_lift.getRawButton(4):
+        if self.joystick_lift.getRawButton(4) and not self.soft_lift_stop.get():
             self.shooter.tilt_up()
         elif self.joystick_lift.getRawButton(2):
             self.shooter.tilt_down()
+        elif self.joystick_lift.getRawButton(4) and self.joystick_lift.getRawButton(9):
+            self.shooter.tilt_up()
         else:
             self.shooter.stop_tilt()
 
@@ -74,23 +82,21 @@ class MyRobot(wpilib.IterativeRobot):
             if self.joystick_lift.getRawButton(8):
                 self.shooter.set_boulder_speed(0.5)
             else:
-                self.shooter.set_boulder_speed(1.0)
+                self.shooter.set_boulder_speed(0.85)
         else:
             self.shooter.stop_launcher()
 
+        kick_stop = not self.kick_stop.get()
         # Set a flag that we should complete a rotation so we don't stop
         # until we've gotten all the way around
-
         if self.joystick_lift.getRawButton(7): # Set the flag and start rotation
             self.kicking = True
             self.shooter.run_kick()
-        elif self.kicking and self.kick_stop.get(): # If we're kicking and we haven't moved enough to
+        elif self.kicking and kick_stop: # If we're kicking and we haven't moved enough to
             self.shooter.run_kick()                 # flip the switch, run anyway
-        elif self.kicking and not self.kick_stop.get(): # After the switch is depressed, unset the flag
+        elif self.kicking and not kick_stop: # After the switch is depressed, unset the flag
             self.shooter.run_kick()                     # and keep going
             self.kicking = False
-        elif not self.kick_stop.get(): # If the button is depressed, run the kicker around
-            self.shooter.run_kick()
         else: # If we have no idea whats going on stop everything
             self.shooter.stop_kick()
 

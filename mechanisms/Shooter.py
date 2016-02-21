@@ -1,14 +1,11 @@
 import wpilib
 
 class Shooter:
-    def __init__(self, left_motor, right_motor, tilt_motor, kick_motor, lift_slow_up_limit, lift_slow_down_limit):
+    def __init__(self, left_motor, right_motor, tilt_motor, kick_motor):
         self.left_motor = left_motor
         self.right_motor = right_motor
         self.tilt_motor = tilt_motor
         self.kick_motor = kick_motor
-
-        self.lift_slow_up_limit = lift_slow_up_limit
-        self.lift_slow_down_limit = lift_slow_down_limit
 
     def set_boulder_speed(self, motor_speed):
         self.left_motor.set(motor_speed)
@@ -21,16 +18,10 @@ class Shooter:
         self.kick_motor.set(0.0)
 
     def tilt_up(self):
-        if self.lift_slow_up_limit.get():
-            self.tilt_motor.set(0.65)
-        else:
-            self.tilt_motor.set(1.0)
+        self.tilt_motor.set(1.0)
 
     def tilt_down(self):
-        if self.lift_slow_down_limit.get():
-            self.tilt_motor.set(-0.65)
-        else:
-            self.tilt_motor.set(-1.0)
+        self.tilt_motor.set(-1.0)
 
     def stop_tilt(self):
         self.tilt_motor.set(0.0)
