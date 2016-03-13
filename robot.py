@@ -61,9 +61,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.shooter.stop_kick()
 
     def teleopPeriodic(self):
-        # self.elbow_motor.set(self.joystick_lift.getX())
-        # self.arm_tilt.set(self.joystick_lift.getZ())
-
          # Switch to tank drive if a special button is held down
         if self.joystick_drive.getRawButton(8) or self.joystick_drive.getRawButton(6):
             self.drive_train.tankDrive(self.joystick_drive.getY(), self.joystick_drive.getAxis(4))
