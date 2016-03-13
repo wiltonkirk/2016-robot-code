@@ -42,6 +42,10 @@ class MyRobot(wpilib.IterativeRobot):
         # that in autonomous mode
         self.drive_train.setSafetyEnabled(False)
 
+        self.drive_train.drive(0.3, 0.0)
+        time.sleep(3)
+        self.drive_train.drive(0.0, 0.0)
+
         # Re-enable the motor watchdog timer when we're done
         self.drive_train.setSafetyEnabled(True)
 
