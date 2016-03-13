@@ -58,6 +58,7 @@ class MyRobot(wpilib.IterativeRobot):
 
     def teleopInit(self):
         self.kicking = False
+        self.shooter.stop_kick()
 
     def teleopPeriodic(self):
         # self.elbow_motor.set(self.joystick_lift.getX())
