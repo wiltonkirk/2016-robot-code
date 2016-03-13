@@ -33,6 +33,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.elbow_motor = wpilib.Jaguar(6)
         self.arm_tilt = wpilib.Jaguar(7)
 
+        self.autonomous_picker = wpilib.AnalogInput(0)
+
         self.drive_train.setExpiration(0.2)
 
     def autonomousInit(self):
@@ -42,9 +44,23 @@ class MyRobot(wpilib.IterativeRobot):
         # that in autonomous mode
         self.drive_train.setSafetyEnabled(False)
 
-        self.drive_train.drive(0.3, 0.0)
-        time.sleep(3)
-        self.drive_train.drive(0.0, 0.0)
+        self.shooter.tilt_down()
+        time.sleep(1.1)
+        self.shooter.stop_tilt()
+
+        if self.autonomous_picker.getVoltage() < 1.66:
+            self.drive_train.drive(0.0, 0.0)
+            time.sleep(1)
+
+        elif self.autonomous_picker.getVoltage() < 3.34:
+            self.drive_train.drive(0.40, -0.05)
+            time.sleep(1.1)
+            self.drive_train.drive(0.0, 0.0)
+
+        else:
+            self.drive_train.drive(0.65, 0.0)
+            time.sleep(1.5)
+            self.drive_train.drive(0.0, 0.0)
 
         # Re-enable the motor watchdog timer when we're done
         self.drive_train.setSafetyEnabled(True)
