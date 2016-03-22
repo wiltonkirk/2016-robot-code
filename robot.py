@@ -105,21 +105,6 @@ class MyRobot(wpilib.IterativeRobot):
         else:
             self.shooter.stop_launcher()
 
-        #
-        # kick_stop = not self.kick_stop.get()
-        # # Set a flag that we should complete a rotation so we don't stop
-        # # until we've gotten all the way around
-        # if self.joystick_lift.getRawButton(7): # Set the flag and start rotation
-        #     self.kicking = True
-        #     self.shooter.run_kick()
-        # elif self.kicking and kick_stop: # If we're kicking and we haven't moved enough to
-        #     self.shooter.run_kick()                 # flip the switch, run anyway
-        # elif self.kicking and not kick_stop: # After the switch is depressed, unset the flag
-        #     self.shooter.run_kick()                     # and keep going
-        #     self.kicking = False
-        # else: # If we have no idea whats going on stop everything
-        #     self.shooter.stop_kick()
-
         if self.joystick_lift.getRawButton(7):
             self.shooter.run_kick()
         else:
